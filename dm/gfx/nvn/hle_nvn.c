@@ -2626,6 +2626,12 @@ NVN(nvnDeviceSetIntermediateShaderCache, void, NVNdevice *d, int n) { (void)d; (
 NVN_NOPROTO(nvnWindowBuilderSetNumActiveTextures, void, NVNwindowBuilder *b, int n) { (void)b; ONCE_LOG("WindowBuilderSetNumActiveTextures %d (the host rotates through the SetTextures count)", n); }
 NVN_NOPROTO(nvnWindowSetNumActiveTextures, void, NVNwindow *w, int n) { (void)w; ONCE_LOG("WindowSetNumActiveTextures %d (the host rotates through the SetTextures count)", n); }
 
+// The Switch 2's NVN2 acquire timeout: how long the window waits for a swapchain image (ns). The host never waits (its present thread paces the frames itself), but the game reads the value back, so it is kept
+NVN_NOPROTO(nvnWindowBuilderSetAcquireTimeout, void, NVNwindowBuilder *b, uint64_t t) { ((win_builder_t *)b)->acquire_timeout = t; }
+NVN_NOPROTO(nvnWindowBuilderGetAcquireTimeout, uint64_t, const NVNwindowBuilder *b) { return ((const win_builder_t *)b)->acquire_timeout; }
+NVN_NOPROTO(nvnWindowSetAcquireTimeout, void, NVNwindow *w, uint64_t t) { ((win_t *)w)->acquire_timeout = t; }
+NVN_NOPROTO(nvnWindowGetAcquireTimeout, uint64_t, const NVNwindow *w) { return ((const win_t *)w)->acquire_timeout; }
+
 // Command buffer memory usage: record bytes written in this recording (accumulated across segments; the host does not use control memory, always 0); the memory callback switch is ignored.
 // It used to be cur - begin: once a recording overflowed into a host segment, cur is in host memory (an address below the guest begin) and it returned 0. SMBW asks for this value after recording each material setup handle,
 // and on 0 (with control memory also 0) treats the recording as empty and marks the handle invalid (from main+0x4bb6c it clears bit 0 of the material entry +0x50); later draws no longer CALL it and inherit the previous object's vertex buffers / textures:

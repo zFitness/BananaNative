@@ -500,6 +500,10 @@ typedef void (*NVNT_nvnCommandBufferSignalEvent)(NVNcommandBuffer*, const NVNeve
 //   nvnWindowSetNumActiveTextures
 //   nvnWindowGetNumActiveTextures
 //   nvnWindowGetNumTextures
+//   nvnWindowBuilderSetAcquireTimeout
+//   nvnWindowBuilderGetAcquireTimeout
+//   nvnWindowSetAcquireTimeout
+//   nvnWindowGetAcquireTimeout
 //   nvnProgramSetShadersExt
 //   nvnProgramSetSampleShading
 //   nvnMemoryPoolBuilderGetDevice

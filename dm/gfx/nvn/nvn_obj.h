@@ -59,10 +59,11 @@ typedef struct { uint32_t magic, fenced; uint64_t fence; } sync_t;   /* fenced 2
 typedef struct { const pool_t *pool; int64_t off; } ev_builder_t;                             FITS(ev_builder_t, NVNeventBuilder);
 typedef struct { uint32_t magic; volatile uint32_t *val; } ev_t;                              FITS(ev_t, NVNevent);
 
-typedef struct { NVNdevice *dev; void *native; int32_t ntex, interval; NVNtexture *tex[4]; } win_builder_t;
+// acquire_timeout: the Switch 2's NVN2 lets the game set how long a window waits for an image (ns); the host does not wait, but it keeps the value so the game reads back what it set
+typedef struct { NVNdevice *dev; void *native; int32_t ntex, interval; NVNtexture *tex[4]; uint64_t acquire_timeout; } win_builder_t;
 FITS(win_builder_t, NVNwindowBuilder);
 // avail[i]: time at which swapchain image i can be acquired again (ns, monotonic clock) = its display time + one present period; pace: target time of this window's present pacer
-typedef struct { uint32_t magic; void *native; int32_t ntex, interval, next, crop[4]; NVNtexture *tex[4]; uint64_t presents, avail[4], pace, ticket[4], pfence[4]; } win_t;   // ticket[i]: ticket of the most recent present of image i; pfence[i]: the last fence reserved when it was presented
+typedef struct { uint32_t magic; void *native; int32_t ntex, interval, next, crop[4]; NVNtexture *tex[4]; uint64_t presents, avail[4], pace, ticket[4], pfence[4], acquire_timeout; } win_t;   // ticket[i]: ticket of the most recent present of image i; pfence[i]: the last fence reserved when it was presented
 FITS(win_t, NVNwindow);
 
 // Command buffer: commands are written into the command memory given by the game (AddCommandMemory), handle = segment start address; when it runs out, the game is called back for more memory

@@ -175,6 +175,15 @@
 - **Fix:** the entry's last byte in a `DMROMFS1` index ([format](../../dm/tools/romfs_image.py)) is 1 on a file that failed the check (`img_ent.flags`, `romfs_image.h`; `nx_extract` sets it, and every reader refuses another value, or a flag on a directory). The mark stays with the image in an IPA, a Mac app or a hand-copied `romfs.img`. The host logs `[RED] fs RomFS image <path>: damaged files <N>: ...` at the mount and `[RED] fs rom:/<file> failed the NCA's hash check ...` at each damaged file's first open. A clean image is byte-identical to one from before this mark (checked on SteamWorld Dig), so its identity does not change. Not marked: an image extracted before this change, and folder extraction, which has no index (the NSP script writes images). Search a crash's log for `hash check` before looking for a cause in the host.
 - **Found on:** [Breath of the Wild](../../dm/games/01007EF00011E000/README.md#found-on-this-game) ([issue #810](https://github.com/seedds/nxnative/issues/810)). `dm/host/tests/t_fs.c` checks the count, the single report at first open and the refused flags; a boot of SteamWorld Dig on a deliberately damaged image logged the count and the files it opened.
 
+## Incomplete dumps
+
+### A dump that is missing files crashes the game
+
+- **Symptom:** the game crashes in its own code with a NULL read (`CRASH sig=11 addr=0 pc=main+…`) right after the log shows files it could not open (`fs open not found: content:/…`), and the host says nothing else about them. Every run stops at the same place, and the files it cannot open are the same ones each time.
+- **Cause:** the dump does not hold every file of the product. The game asks for its files by path, reads what is not there as an empty texture or an empty table, and its own code then uses the empty result (a material list it never filled). Nothing is damaged and nothing is misread: the files are simply not in the dump, so no host-side change can bring them back.
+- **Fix:** none in the host; the files have to come from a complete dump. What shows a dump short: the game's own list of the product's files, `System/Resource/ResourceSizeTable.Product.<version>.rsizetable.zs` (the `RESTBL` format: a header, then a table sorted by a path hash with a size for each file, then the names of a few of them), read against the dump's file list — a path the table names that the dump does not hold, or a table with more entries than the dump has files, is a file the dump is missing. A `.nup`'s own table of contents settles what a dump holds: every name in it is a file the dump has.
+- **Found on:** [The Legend of Zelda: Ocarina of Time](../../dm/games/0400486024DEC000/README.md#the-dump-is-missing-files) (Switch 2, update v131072): the dump holds 186,808 files against the 219,968 its own size table lists, and three of the ten paths the table names are in neither package. Applies to any game.
+
 ## Sparse base games
 
 ### The survey's build ID lookup stops on the base game alone with a hash error

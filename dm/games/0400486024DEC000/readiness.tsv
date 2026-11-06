@@ -1,0 +1,18 @@
+# What this game needs of an Android phone, for the launcher's readiness check (android/README.md "Readiness check"; the format in dm/games/README.md "Readiness rows").
+# <required|degraded> <TAB> <fact> <TAB> <at least> <TAB> <title>: <why>. Facts: what vka_readiness.c reports, ram_gib (ActivityManager totalMem in GiB) and android.sdk.
+# A table of its own, not game.tsv rows: the launcher's rows apart from the host's (a pack's rewrite key hashes only game.tsv's build rows, pack_android.py rewrite_key).
+
+# In bring-up on Android: it reaches its graphics module's init and stops there, on a dump that is missing files (the note)
+status	bring-up
+
+# Memory: the game asks for a 3.20 GiB heap in nninitStartup (main+0x260bb10) and the host's block is 0x240000000 (8.8 GiB) with a 6 GiB application pool; the tested phone
+# (Lenovo TB322FC) has 14.8 GiB and the game maps 0.50 GB of the pool and 1.50 GB of the alias region on top of the heap (the note)
+required	ram_gib	6	Memory: the game asks for a 3.20 GiB heap at startup, which the phone has to give it in resident memory
+degraded	ram_gib	12	Memory: tested on a 14.8 GiB phone only; with less, Android may stop the game when memory runs short
+
+# Compute shaders: the game's largest compute shader takes 18,432 bytes of shared memory (shader_facts.tsv), above Vulkan's 16 KiB minimum
+required	limit.maxComputeSharedMemorySize	18432	Compute shared memory: the game's largest compute shader takes 18,432 bytes
+
+# Mesh and task shaders: the game has 9 mesh and 3 task programs (shader_map.tsv); the tested phone's Turnip has no VK_EXT_mesh_shader, so the host skips those draws
+degraded	feature.meshShader	1	Mesh shaders: the game's 9 mesh programs draw with them; without the extension the host skips those draws
+degraded	feature.taskShader	1	Task shaders: the game's 3 task programs draw with them; without the extension the host skips those draws
